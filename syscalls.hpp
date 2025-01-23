@@ -7,6 +7,9 @@
 #include <string>
 #include <unordered_map>
 
+extern "C" NTSTATUS NTAPI trampoline(DWORD syscallNo,
+                                     uintptr_t syscallInstrAddr, ...);
+
 namespace spi {
 
 class syscalls {
@@ -21,7 +24,10 @@ public:
   uintptr_t getSyscallInstrAddr();
 
   template <typename... Args>
-  NTSTATUS Call(const std::string &funcName, Args...);
+  NTSTATUS Call(const std::string &funcName, Args... args) {
+    return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
+                      args...);
+  }
 };
 
 } // namespace spi

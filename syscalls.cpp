@@ -1,16 +1,13 @@
 #include "syscalls.hpp"
-#include <algorithm>
 #include <cstdint>
 #include <cstdio>
-#include <iostream>
 #include <libloaderapi.h>
 #include <minwindef.h>
+#include <ntdef.h>
 #include <stdexcept>
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
-
-extern "C" NTSTATUS syscallStub(...);
 
 namespace spi {
 
@@ -74,13 +71,6 @@ uintptr_t syscalls::getSyscallInstrAddr() {
       return reinterpret_cast<uintptr_t>(stubBase + i);
   }
   throw std::runtime_error("Couldn't find a syscall instruction");
-}
-
-template <typename... Args>
-NTSTATUS syscalls::Call(const std::string &funcName, Args... args) {
-  // asm("push %0" ::"r"(getSyscallNumber("NtOpenProcess")));
-  // asm("push %0" ::"r"(getSyscallInstrAddr()));
-  // syscallStub(std::forward(args)...);
 }
 
 } // namespace spi
