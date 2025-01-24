@@ -9,7 +9,7 @@
 #include <winnt.h>
 #include <winternl.h>
 
-namespace spi {
+namespace gate0 {
 
 syscalls::syscalls() {
   populateStubs();
@@ -73,4 +73,4 @@ uintptr_t syscalls::getSyscallInstrAddr() {
   throw std::runtime_error("Couldn't find a syscall instruction");
 }
 
-} // namespace spi
+} // namespace gate0

