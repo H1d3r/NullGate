@@ -1,9 +1,13 @@
+#include <cstdint>
 #include <cstdio>
+#include <ctime>
 #include <libloaderapi.h>
 #include <minwindef.h>
 #include <ntdef.h>
+#include <nullgate/hashing.hpp>
 #include <nullgate/syscalls.hpp>
 #include <stdexcept>
+#include <string>
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
@@ -58,7 +62,20 @@ void syscalls::populateSyscalls() {
 }
 
 DWORD syscalls::getSyscallNumber(const std::string &funcName) {
+  if (!syscallNoMap.contains(funcName))
+    throw std::runtime_error("Function not found: " + funcName);
+
   return syscallNoMap.at(funcName);
+}
+
+DWORD syscalls::getSyscallNumber(uint64_t funcNameHash) {
+  for (const auto &ntFuncPair : syscallNoMap) {
+    if (fnv1Runtime(ntFuncPair.first.c_str()) == funcNameHash)
+      return ntFuncPair.second;
+  }
+
+  throw std::runtime_error("Function hash not found: " +
+                           std::to_string(funcNameHash));
 }
 
 uintptr_t syscalls::getSyscallInstrAddr() {

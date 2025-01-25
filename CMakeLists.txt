@@ -12,6 +12,7 @@ add_executable(sample
     ./src/sample/sample.cpp
     ./src/nullgate/syscalls.S
     ./src/nullgate/syscalls.cpp
+    ./src/nullgate/hashing.cpp
 )
 target_include_directories(sample
     PRIVATE ./include/

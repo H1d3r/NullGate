@@ -17,6 +17,7 @@ class syscalls {
   void populateStubs();
   void populateSyscalls();
   DWORD getSyscallNumber(const std::string &func);
+  DWORD getSyscallNumber(uint64_t funcNameHash);
   uintptr_t getSyscallInstrAddr();
 
 public:
@@ -30,6 +31,17 @@ public:
     constexpr size_t argStackSize =
         sizeof...(args) <= 4 ? 0 : sizeof...(args) - 4;
     return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
+                      argStackSize, std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
+  NTSTATUS Call(uint64_t funcNameHash, Args... args) {
+    // We don't care that are right know there could be more on the stack, this
+    // is supposed to represent the number of args on the stack disregarding the
+    // added arguments
+    constexpr size_t argStackSize =
+        sizeof...(args) <= 4 ? 0 : sizeof...(args) - 4;
+    return trampoline(getSyscallNumber(funcNameHash), getSyscallInstrAddr(),
                       argStackSize, std::forward<Args>(args)...);
   }
 };
