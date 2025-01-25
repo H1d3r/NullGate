@@ -1,15 +1,14 @@
-#include "syscalls.hpp"
-#include <cstdint>
 #include <cstdio>
 #include <libloaderapi.h>
 #include <minwindef.h>
 #include <ntdef.h>
+#include <nullgate/syscalls.hpp>
 #include <stdexcept>
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
 
-namespace gate0 {
+namespace nullgate {
 
 syscalls::syscalls() {
   populateStubs();
@@ -73,4 +72,4 @@ uintptr_t syscalls::getSyscallInstrAddr() {
   throw std::runtime_error("Couldn't find a syscall instruction");
 }
 
-} // namespace gate0
+} // namespace nullgate

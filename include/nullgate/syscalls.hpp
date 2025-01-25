@@ -9,18 +9,18 @@
 
 extern "C" NTSTATUS NTAPI trampoline(size_t syscallNo, uintptr_t syscallAddr,
                                      size_t ArgumentsSize, ...);
-namespace gate0 {
+namespace nullgate {
 
 class syscalls {
   std::map<PDWORD, std::string> stubMap;
   std::unordered_map<std::string, DWORD> syscallNoMap;
   void populateStubs();
   void populateSyscalls();
+  DWORD getSyscallNumber(const std::string &func);
+  uintptr_t getSyscallInstrAddr();
 
 public:
   explicit syscalls();
-  DWORD getSyscallNumber(const std::string &func);
-  uintptr_t getSyscallInstrAddr();
 
   template <typename... Args>
   NTSTATUS Call(const std::string &funcName, Args... args) {
@@ -34,4 +34,4 @@ public:
   }
 };
 
-} // namespace gate0
+} // namespace nullgate

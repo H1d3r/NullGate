@@ -1,7 +1,7 @@
-#include "ntapi.hpp"
-#include "syscalls.hpp"
-#include <minwinbase.h>
+// #include <minwinbase.h>
 #include <ntdef.h>
+#include <nullgate/syscalls.hpp>
+#include <sample/ntapi.hpp>
 #include <stdexcept>
 #include <string>
 #include <windows.h>
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   if (argc != 2)
     throw std::runtime_error("Wrong arg count\n");
 
-  gate0::syscalls syscalls;
+  nullgate::syscalls syscalls;
   DWORD PID = std::stoi(argv[1]);
   HANDLE processHandle = NULL;
   OBJECT_ATTRIBUTES objectAttrs = {sizeof(objectAttrs), NULL};
