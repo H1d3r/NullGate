@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
 set(CMAKE_ASM_COMPILER x86_64-w64-mingw32-g++)
 set(CMAKE_CXX_FLAGS "-s -O3")
