@@ -5,6 +5,7 @@
 #include <minwindef.h>
 #include <ntdef.h>
 #include <nullgate/hashing.hpp>
+#include <nullgate/ntdll.hpp>
 #include <nullgate/syscalls.hpp>
 #include <stdexcept>
 #include <string>
@@ -20,15 +21,9 @@ syscalls::syscalls() {
 }
 
 void syscalls::populateStubs() {
-  PPEB peb = reinterpret_cast<PPEB>(__readgsqword(0x60));
-  // ntdll is always the first module after the executable to be loaded
-  const auto ntdllLdrEntry = reinterpret_cast<PLDR_DATA_TABLE_ENTRY>(
-      // NIGHTMARE NIGHTMARE NIGHTMARE
-      CONTAINING_RECORD(peb->Ldr->InMemoryOrderModuleList.Flink->Flink,
-                        LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks));
-  const auto ntdllBase = reinterpret_cast<PBYTE>(ntdllLdrEntry->DllBase);
-  const auto dosHeaders = reinterpret_cast<PIMAGE_DOS_HEADER>(ntdllBase);
+  const auto ntdllBase = reinterpret_cast<PBYTE>(ntdll::GetNtdllHandle());
 
+  const auto dosHeaders = reinterpret_cast<PIMAGE_DOS_HEADER>(ntdllBase);
   // e_lfanew points to ntheaders(microsoft's great naming)
   const auto ntHeaders =
       reinterpret_cast<PIMAGE_NT_HEADERS>(ntdllBase + dosHeaders->e_lfanew);
