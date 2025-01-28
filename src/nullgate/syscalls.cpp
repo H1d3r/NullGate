@@ -4,8 +4,8 @@
 #include <libloaderapi.h>
 #include <minwindef.h>
 #include <ntdef.h>
-#include <nullgate/hashing.hpp>
 #include <nullgate/ntdll.hpp>
+#include <nullgate/obfuscation.hpp>
 #include <nullgate/syscalls.hpp>
 #include <stdexcept>
 #include <string>
@@ -42,11 +42,11 @@ void syscalls::populateStubs() {
   for (DWORD i{}; i < exportDir->NumberOfNames; i++) {
     std::string funcName =
         reinterpret_cast<const char *>(ntdllBase + namesTable[i]);
-    if (funcName.starts_with(hashing::xorDecode("HBE="))) {
+    if (funcName.starts_with(obfuscation::xorDecode("HBE="))) {
       auto funcAddr = reinterpret_cast<PDWORD>(
           ntdllBase + functionsTable[ordinalsTable[i]]);
       stubMap.emplace(funcAddr,
-                      hashing::xorDecode("CBI=") + funcName.substr(2));
+                      obfuscation::xorDecode("CBI=") + funcName.substr(2));
     }
   }
 }
@@ -60,19 +60,19 @@ void syscalls::populateSyscalls() {
 DWORD syscalls::getSyscallNumber(const std::string &funcName) {
   if (!syscallNoMap.contains(funcName))
     throw std::runtime_error(
-        hashing::xorDecode("ABMfLEczPlh4JEQnaSUuBSgCS28=") + funcName);
+        obfuscation::xorDecode("ABMfLEczPlh4JEQnaSUuBSgCS28=") + funcName);
 
   return syscallNoMap.at(funcName);
 }
 
 DWORD syscalls::getSyscallNumber(uint64_t funcNameHash) {
   for (const auto &ntFuncPair : syscallNoMap) {
-    if (hashing::fnv1Runtime(ntFuncPair.first.c_str()) == funcNameHash)
+    if (obfuscation::fnv1Runtime(ntFuncPair.first.c_str()) == funcNameHash)
       return ntFuncPair.second;
   }
 
   throw std::runtime_error(
-      hashing::xorDecode("ABMfLEczPlh4IkogIWMvHzJGFyBGNDUMeA==") +
+      obfuscation::xorDecode("ABMfLEczPlh4IkogIWMvHzJGFyBGNDUMeA==") +
       std::to_string(funcNameHash));
 }
 
@@ -84,8 +84,8 @@ uintptr_t syscalls::getSyscallInstrAddr() {
     if (memcmp(syscallOpcode, stubBase + i, sizeof(syscallOpcode)) == 0)
       return reinterpret_cast<uintptr_t>(stubBase + i);
   }
-  throw std::runtime_error(
-      hashing::xorDecode("BQkEI1c0dkJ4LEI9LWMgUDUfAixSNj0WMSRYJzs2IgQvCR8="));
+  throw std::runtime_error(obfuscation::xorDecode(
+      "BQkEI1c0dkJ4LEI9LWMgUDUfAixSNj0WMSRYJzs2IgQvCR8="));
 }
 
 } // namespace nullgate

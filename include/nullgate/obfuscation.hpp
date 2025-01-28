@@ -8,7 +8,7 @@ inline const std::string KEY = "FfqO3ZQ6XJ+SICAp";
 
 namespace nullgate {
 
-class hashing {
+class obfuscation {
   static std::string base64Encode(const std::string &in);
 
   static std::string base64Decode(const std::string &in);

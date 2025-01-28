@@ -1,12 +1,12 @@
 #include <cstdint>
-#include <nullgate/hashing.hpp>
+#include <nullgate/obfuscation.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace nullgate {
 
-uint64_t hashing::fnv1Runtime(const char *str) {
+uint64_t obfuscation::fnv1Runtime(const char *str) {
   const uint64_t fnvOffsetBasis = 14695981039346656037;
   const uint64_t fnvPrime = 1099511628211;
   uint64_t hash = fnvOffsetBasis;
@@ -18,7 +18,7 @@ uint64_t hashing::fnv1Runtime(const char *str) {
   return hash;
 }
 
-std::string hashing::xorHash(const std::string &str) {
+std::string obfuscation::xorHash(const std::string &str) {
   std::string output;
   output.reserve(str.length());
   for (int i{}; i < str.length(); i++)
@@ -26,7 +26,7 @@ std::string hashing::xorHash(const std::string &str) {
   return output;
 }
 
-std::string hashing::base64Encode(const std::string &in) {
+std::string obfuscation::base64Encode(const std::string &in) {
   std::string out;
 
   int val = 0, valb = -6;
@@ -49,7 +49,7 @@ std::string hashing::base64Encode(const std::string &in) {
   return out;
 }
 
-std::string hashing::base64Decode(const std::string &in) {
+std::string obfuscation::base64Decode(const std::string &in) {
   // table from '+' to 'z'
   const uint8_t lookup[] = {
       62,  255, 62,  255, 63,  52,  53, 54, 55, 56, 57, 58, 59, 60, 61, 255,
@@ -77,15 +77,15 @@ std::string hashing::base64Decode(const std::string &in) {
   return out;
 }
 
-std::string hashing::xorEncode(const std::string &in) {
+std::string obfuscation::xorEncode(const std::string &in) {
   return base64Encode(xorHash(in));
 }
 
-std::string hashing::xorDecode(const std::string &in) {
+std::string obfuscation::xorDecode(const std::string &in) {
   return xorHash(base64Decode(in));
 }
 
-uint8_t hashing::char2int(char c) {
+uint8_t obfuscation::char2int(char c) {
   if (c >= '0' && c <= '9')
     return c - '0';
   if (c >= 'A' && c <= 'F')
@@ -97,7 +97,7 @@ uint8_t hashing::char2int(char c) {
                               c);
 }
 
-std::vector<unsigned char> hashing::hex2bin(const std::string &hexString) {
+std::vector<unsigned char> obfuscation::hex2bin(const std::string &hexString) {
   std::vector<unsigned char> byteArray;
   byteArray.reserve(hexString.size() / 2);
   for (int i{}; i < hexString.size(); i += 2) {

