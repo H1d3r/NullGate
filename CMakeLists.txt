@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_FLAGS "-s -O3")
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
-set(CROSSCOMPILE ON)
 if (CROSSCOMPILE)
     set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
     set(CMAKE_ASM_COMPILER x86_64-w64-mingw32-g++)
