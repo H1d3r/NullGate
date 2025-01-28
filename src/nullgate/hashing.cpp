@@ -1,6 +1,8 @@
 #include <cstdint>
 #include <nullgate/hashing.hpp>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace nullgate {
 
@@ -81,6 +83,28 @@ std::string hashing::xorEncode(const std::string &in) {
 
 std::string hashing::xorDecode(const std::string &in) {
   return xorHash(base64Decode(in));
+}
+
+uint8_t hashing::char2int(char c) {
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  if (c >= 'A' && c <= 'F')
+    return c - 'A' + 10;
+  if (c >= 'a' && c <= 'f')
+    return c - 'a' + 10;
+
+  throw std::invalid_argument(std::string("Character is not a hex number: ") +
+                              c);
+}
+
+std::vector<unsigned char> hashing::hex2bin(const std::string &hexString) {
+  std::vector<unsigned char> byteArray;
+  byteArray.reserve(hexString.size() / 2);
+  for (int i{}; i < hexString.size(); i += 2) {
+    byteArray.emplace_back(16 * char2int(hexString.at(i)) +
+                           char2int(hexString.at(i + 1)));
+  }
+  return byteArray;
 }
 
 } // namespace nullgate

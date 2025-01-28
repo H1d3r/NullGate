@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <stdexcept>
 #include <string>
+#include <vector>
 
 inline const std::string KEY = "FfqO3ZQ6XJ+SICAp";
 
@@ -14,6 +14,8 @@ class hashing {
   static std::string base64Decode(const std::string &in);
 
   static std::string xorHash(const std::string &str);
+
+  static uint8_t char2int(char c);
 
 public:
   static inline consteval uint64_t fnv1Const(const char *str) {
@@ -34,6 +36,8 @@ public:
   static std::string xorEncode(const std::string &in);
 
   static std::string xorDecode(const std::string &in);
+
+  static std::vector<unsigned char> hex2bin(const std::string &hexString);
 };
 
 } // namespace nullgate
