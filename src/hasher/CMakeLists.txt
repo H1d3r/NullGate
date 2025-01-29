@@ -9,7 +9,7 @@ project(hasher)
 
 add_executable(hasher
     ./hasher.cpp
-    ../nullgate/hashing.cpp
+    ../nullgate/obfuscation.cpp
 )
 
 target_include_directories(hasher

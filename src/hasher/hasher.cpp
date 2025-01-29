@@ -1,5 +1,5 @@
 #include <iostream>
-#include <nullgate/hashing.hpp>
+#include <nullgate/obfuscation.hpp>
 #include <string>
 #include <vector>
 
@@ -13,5 +13,6 @@ int main() {
   }
 
   for (const auto &querry : input)
-    std::cout << querry << ": " << nullgate::hashing::xorEncode(querry) << "\n";
+    std::cout << querry << ": " << nullgate::obfuscation::xorEncode(querry)
+              << "\n";
 }
