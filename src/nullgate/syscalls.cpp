@@ -1,14 +1,11 @@
-#include <cstdint>
 #include <cstdio>
 #include <ctime>
 #include <libloaderapi.h>
 #include <minwindef.h>
 #include <ntdef.h>
-#include <nullgate/ntdll.hpp>
 #include <nullgate/obfuscation.hpp>
 #include <nullgate/syscalls.hpp>
 #include <stdexcept>
-#include <string>
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
@@ -21,7 +18,13 @@ syscalls::syscalls() {
 }
 
 void syscalls::populateStubs() {
-  const auto ntdllBase = reinterpret_cast<PBYTE>(ntdll::GetNtdllHandle());
+  PPEB peb = reinterpret_cast<PPEB>(__readgsqword(0x60));
+  // ntdll is always the first module after the executable to be loaded
+  const auto ntdllLdrEntry = reinterpret_cast<PLDR_DATA_TABLE_ENTRY>(
+      // NIGHTMARE NIGHTMARE NIGHTMARE
+      CONTAINING_RECORD(peb->Ldr->InMemoryOrderModuleList.Flink->Flink,
+                        LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks));
+  const auto ntdllBase = reinterpret_cast<PBYTE>(ntdllLdrEntry->DllBase);
 
   const auto dosHeaders = reinterpret_cast<PIMAGE_DOS_HEADER>(ntdllBase);
   // e_lfanew points to ntheaders(microsoft's great naming)
