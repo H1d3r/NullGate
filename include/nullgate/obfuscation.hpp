@@ -19,7 +19,7 @@ class obfuscation {
 
 public:
   static inline consteval uint64_t fnv1Const(const char *str) {
-    const uint64_t fnvOffsetBasis = 14695981039346656037;
+    const uint64_t fnvOffsetBasis = 14695981039346656037U;
     const uint64_t fnvPrime = 1099511628211;
     uint64_t hash = fnvOffsetBasis;
     char c{};
