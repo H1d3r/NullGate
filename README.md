@@ -39,7 +39,7 @@ cmake . -B build
 cmake --build build/
 ```
 > [!NOTE]
-> If you are crosscompiling on linux and have mingw installed, you can use the `-DCROSSCOMPILE=ON` option to automatically set mingw as the default compiler for the relevant parts of the program.
+> If you are crosscompiling on linux and have mingw installed, you can use the `-DNULLGATE_CROSSCOMPILE=ON` option to automatically set mingw as the default compiler for the relevant parts of the program.
 
 ## Windows defender memory scan bypass
 The core of the issue is that when we call `NtCreateRemoteThreadEx` or `NtCreateProcess`, a memory scan gets triggered and our signatured as hell msfvenom payload gets detected.
@@ -57,6 +57,6 @@ With this technique we don't have to worry about our memory being accessed after
 Only after the fact the decrypted shellcode is written and the execution is resumed.
 
 ## Credits:
-- To [@ElephantSe4l](https://github.com/ElephantSe4l) and [@MarioBartolome](https://github.com/MarioBartolome) for a great method of dynamic syscall number retrieval.
+- To [@ElephantSe4l](https://github.com/ElephantSe4l) and [@MarioBartolome](https://github.com/MarioBartolome) for a great method of dynamic syscall number retrieval and generally the whole project from which I've taken great inspiration of of.
 - To [@cr-0w](https://github.com/cr-0w) for the amazing [blog post](https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/indirect-syscalls) and [video](https://www.youtube.com/watch?v=-M2_mZg_2Ew) discussing direct and indirect syscalls.
 - To [bordergate](https://www.bordergate.co.uk/) for the [article](https://www.bordergate.co.uk/windows-defender-memory-scanning-evasion/) that describes the initial method of bypass.
