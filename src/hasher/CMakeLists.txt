@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-if (CROSSCOMPILE)
+if (NULLGATE_CROSSCOMPILE)
     set(CMAKE_CXX_COMPILER /usr/bin/g++)
     set(CMAKE_ASM_COMPILER /usr/bin/g++)
 endif()
