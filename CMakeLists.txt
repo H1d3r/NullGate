@@ -18,10 +18,12 @@ add_library(nullgate
     ./src/nullgate/syscalls.S
     ./src/nullgate/syscalls.cpp
     ./src/nullgate/obfuscation.cpp
+    ./include/nullgate/syscalls.hpp
+    ./include/nullgate/obfuscation.hpp
 )
 
 target_include_directories(nullgate
-    PRIVATE ./include/
+    PUBLIC ./include/
 )
 
 # Sample
@@ -41,4 +43,3 @@ target_link_libraries(sample
 add_subdirectory(
     ./src/hasher/
 )
-
