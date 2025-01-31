@@ -2,6 +2,9 @@
 This project implements a comfortable and modern way to use the NTAPI functions using indirect syscalls, coupled with the [FreshyCalls](https://github.com/crummie5/FreshyCalls) method for dynamic syscall number retrieval.
 It also uses a technique that I haven't seen being metioned to bypass windows defender's memory scanning. It also implements a classic PoC process injector.
 
+## Demo
+![Demonstration of the sample](./assets/demo.gif)
+
 ## Usage
 The usage is pretty straight forward, here is a snippet demonstrating the main functionality:
 ```cpp
