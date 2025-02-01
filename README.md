@@ -6,6 +6,7 @@ It also uses a technique that I haven't seen being metioned to bypass windows de
 ![Demonstration of the sample](./assets/demo.gif)
 
 ## Usage
+
 The usage is pretty straight forward, here is a snippet demonstrating the main functionality:
 ```cpp
 nullgate::syscalls syscalls;
@@ -31,6 +32,32 @@ auto decryptedShellcode =
 ```
 The `hex2bin` function just turns a hex string into a vector of bytes, thanks to this you can just pipe the shellcode from msfvenom with the `-f hex` flag straight into the hasher and not have worry about the special characters.
 
+### Adding nullgate to your project
+CMake FetchContent is supported. Here is an example of a simple CMakeLists.txt:
+
+```cmake
+cmake_minimum_required(VERSION 3.25)
+
+include(FetchContent)
+
+FetchContent_Declare(nullgate
+    GIT_REPOSITORY https://github.com/sentientbottleofwine/NullGate
+    GIT_TAG main
+)
+
+FetchContent_MakeAvailable(nullgate)
+
+project(test)
+
+add_executable(test
+    main.cpp
+)
+
+target_link_libraries(test
+    PRIVATE nullgate
+)
+```
+The linking is done statically so you don't have to worry about symbols being visible.
 ## Build
 ```
 git clone https://github.com/sentientbottleofwine/NullGate
