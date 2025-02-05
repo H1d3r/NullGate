@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_FLAGS "-s -O3")
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
+
+option(NULLGATE_BUILD_SAMPLE "Build sample" OFF)
+option(NULLGATE_CROSSCOMPILE "Crosscompile from linux to windows(uses mingw)" OFF)
+
 if (NULLGATE_CROSSCOMPILE)
     set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
     set(CMAKE_ASM_COMPILER x86_64-w64-mingw32-g++)
@@ -26,18 +30,19 @@ target_include_directories(nullgate
     PUBLIC ./include/
 )
 
-# Sample
-add_executable(sample
-    ./src/sample/sample.cpp
-)
+if(NULLGATE_BUILD_SAMPLE)
+    add_executable(sample
+        ./src/sample/sample.cpp
+    )
 
-target_include_directories(sample
-    PRIVATE ./include/
-)
+    target_include_directories(sample
+        PRIVATE ./include/
+    )
 
-target_link_libraries(sample
-    PRIVATE nullgate
-)
+    target_link_libraries(sample
+        PRIVATE nullgate
+    )
+endif()
 
 # Hasher
 add_subdirectory(
