@@ -59,14 +59,15 @@ target_link_libraries(test
 ```
 The linking is done statically so you don't have to worry about symbols being visible.
 ## Build
+To build the sample use `-DNULLGATE_BUILD_SAMPLE=ON`.
+> [!NOTE]
+> If you are crosscompiling on linux and have mingw installed, you can use the `-DNULLGATE_CROSSCOMPILE=ON` option to automatically set mingw as the default compiler for the relevant parts of the program.
 ```
 git clone https://github.com/sentientbottleofwine/NullGate
 cd NullGate
 cmake . -B build
 cmake --build build/
 ```
-> [!NOTE]
-> If you are crosscompiling on linux and have mingw installed, you can use the `-DNULLGATE_CROSSCOMPILE=ON` option to automatically set mingw as the default compiler for the relevant parts of the program.
 
 ## Windows defender memory scan bypass
 The core of the issue is that when we call `NtCreateRemoteThreadEx` or `NtCreateProcess`, a memory scan gets triggered and our signatured as hell msfvenom payload gets detected.
