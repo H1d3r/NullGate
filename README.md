@@ -65,7 +65,7 @@ To build the sample use `-DNULLGATE_BUILD_SAMPLE=ON`. It will be accessible at `
 ```
 git clone https://github.com/0xsch1zo/NullGate
 cd NullGate
-cmake . -B build
+cmake . -B build -DNULLGATE_BUILD_SAMPLE=ON
 cmake --build build/
 ```
 
