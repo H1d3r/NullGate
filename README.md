@@ -1,5 +1,5 @@
 # NullGate
-This project implements a comfortable and modern way to use the NTAPI functions using indirect syscalls, coupled with the [FreshyCalls](https://github.com/crummie5/FreshyCalls) method for dynamic syscall number retrieval.
+This project implements a comfortable and modern way to use the NTAPI functions using indirect syscalls, coupled with the [FreshyCalls](https://github.com/crummie5/FreshyCalls) method with a little twist for dynamic syscall number retrieval.
 It also uses a technique that I haven't seen being metioned to bypass windows defender's memory scanning. It also implements a classic PoC process injector.
 
 ## Demo
@@ -24,7 +24,7 @@ if (!NT_SUCCESS(status))
                                "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
         std::to_string(status));
 ```
-The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `<build_dir>/src/hasher/hasher`. Just pipe something into it and it will spit out a base64 encoded and xored string.<br><br>
+The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `<build_dir>/_deps/nullgate-build/src/hasher`. Just pipe something into it and it will spit out a base64 encoded and xored string.<br><br>
 To ease the encryption of shellcode a special functon is provided:
 ```cpp
 auto decryptedShellcode =
@@ -41,8 +41,8 @@ cmake_minimum_required(VERSION 3.25)
 include(FetchContent)
 
 FetchContent_Declare(nullgate
-    GIT_REPOSITORY https://github.com/sentientbottleofwine/NullGate
-    GIT_TAG main
+    GIT_REPOSITORY https://github.com/0xsch1zo/NullGate
+    GIT_TAG 1.0.0
 )
 
 FetchContent_MakeAvailable(nullgate)
@@ -59,11 +59,11 @@ target_link_libraries(test
 ```
 The linking is done statically so you don't have to worry about symbols being visible.
 ## Build
-To build the sample use `-DNULLGATE_BUILD_SAMPLE=ON`.
-> [!NOTE]
-> If you are crosscompiling on linux and have mingw installed, you can use the `-DNULLGATE_CROSSCOMPILE=ON` option to automatically set mingw as the default compiler for the relevant parts of the program.
+To build the sample use `-DNULLGATE_BUILD_SAMPLE=ON`. It will be accessible at `<build_dir>/_deps/nullgate-build/sample.exe`. It takes a PID that you want to inject shellcode into as an argument.
+> [!WARNING]
+> If you are using linux you need to have the mingw crosscompiler installed. On Arch for example you can do `pacman -S mingw-w64-gcc`. Then use the `-DNULLGATE_CROSSCOMPILE=ON` option to set mingw as the default compiler for the relevant parts of the program.
 ```
-git clone https://github.com/sentientbottleofwine/NullGate
+git clone https://github.com/0xsch1zo/NullGate
 cd NullGate
 cmake . -B build
 cmake --build build/
