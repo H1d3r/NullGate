@@ -5,6 +5,7 @@
 #include <minwindef.h>
 #include <ntdef.h>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 
 extern "C" NTSTATUS NTAPI trampoline(size_t syscallNo, uintptr_t syscallAddr,
@@ -42,18 +43,22 @@ public:
                       getArgStackSize(args...), std::forward<Args>(args)...);
   }
 
-  template <typename func, typename... Args>
-    requires std::invocable<func, Args...>
-  NTSTATUS SCall(const std::string &funcName, Args &&...args) {
-    return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
-                      getArgStackSize(args...), std::forward<Args>(args)...);
+  template <typename func, typename... Ts>
+    requires std::invocable<func, Ts...>
+  NTSTATUS SCall(const std::string &funcName, Ts &&...args) {
+    return [&]<typename R, typename... Args>(std::type_identity<R(Args...)>) {
+      return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
+                        getArgStackSize(args...), std::forward<Args>(args)...);
+    }(std::type_identity<func>{});
   }
 
-  template <typename func, typename... Args>
-    requires std::invocable<func, Args...>
-  NTSTATUS SCall(uint64_t funcNameHash, Args &&...args) {
-    return trampoline(getSyscallNumber(funcNameHash), getSyscallInstrAddr(),
-                      getArgStackSize(args...), std::forward<Args>(args)...);
+  template <typename func, typename... Ts>
+    requires std::invocable<func, Ts &&...>
+  NTSTATUS SCall(uint64_t funcNameHash, Ts &&...args) {
+    return [&]<typename R, typename... Args>(std::type_identity<R(Args...)>) {
+      return trampoline(getSyscallNumber(funcNameHash), getSyscallInstrAddr(),
+                        getArgStackSize(args...), std::forward<Args>(args)...);
+    }(std::type_identity<func>{});
   }
 };
 
