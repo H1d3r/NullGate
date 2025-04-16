@@ -28,6 +28,16 @@ class syscalls {
     return sizeof...(args) <= 4 ? 0 : sizeof...(args) - 4;
   }
 
+  // Either forwards args perferctly or if they're not compatible casts them to
+  // the right decayed type
+  template <typename To, typename T> decltype(auto) forwardCast(T &&t) {
+    if constexpr (std::is_same_v<std::decay_t<To>, std::decay_t<T>>) {
+      return std::forward<To>(t);
+    } else {
+      return static_cast<To>(t);
+    }
+  }
+
 public:
   explicit syscalls();
 
@@ -43,21 +53,35 @@ public:
                       getArgStackSize(args...), std::forward<Args>(args)...);
   }
 
+  /// @brief Checks if function is callable with the passed arguments, cast the
+  /// arguments to an accepted type. If you get a long as hell template error
+  /// that's probably because you used wrong arguments for the function you
+  /// specified. If not please report.
+  /// @param func Typedef of a function needs to be called
+  /// @param funcName name of the nt function
+  /// @param args arguments of the nt function
   template <typename func, typename... Ts>
     requires std::invocable<func, Ts...>
   NTSTATUS SCall(const std::string &funcName, Ts &&...args) {
     return [&]<typename R, typename... Args>(std::type_identity<R(Args...)>) {
       return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
-                        getArgStackSize(args...), std::forward<Args>(args)...);
+                        getArgStackSize(args...), forwardCast<Args>(args)...);
     }(std::type_identity<func>{});
   }
 
+  /// @brief Checks if function is callable with the passed arguments, cast the
+  /// arguments to an accepted type. If you get a long as hell template error
+  /// that's probably because you used wrong arguments for the function you
+  /// specified. If not please report.
+  /// @param func Typedef of a function needs to be called
+  /// @param funcNameHash fnv1 hash of the name of the nt function
+  /// @param args arguments of the nt function
   template <typename func, typename... Ts>
     requires std::invocable<func, Ts &&...>
   NTSTATUS SCall(uint64_t funcNameHash, Ts &&...args) {
     return [&]<typename R, typename... Args>(std::type_identity<R(Args...)>) {
       return trampoline(getSyscallNumber(funcNameHash), getSyscallInstrAddr(),
-                        getArgStackSize(args...), std::forward<Args>(args)...);
+                        getArgStackSize(args...), forwardCast<Args>(args)...);
     }(std::type_identity<func>{});
   }
 };
