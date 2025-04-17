@@ -41,12 +41,18 @@ class syscalls {
 public:
   explicit syscalls();
 
+  // WARNING: this function does not cast parameters to the right type. Meaning
+  // if the function being called expects `size_t` and `int` is passed there
+  // could be serious issues. It is recommended to use SCall.
   template <typename... Args>
   NTSTATUS Call(const std::string &funcName, Args... args) {
     return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
                       getArgStackSize(args...), std::forward<Args>(args)...);
   }
 
+  // WARNING: this function does not cast parameters to the right type. Meaning
+  // if the function being called expects `size_t` and `int` is passed there
+  // could be serious issues. It is recommended to use SCall.
   template <typename... Args>
   NTSTATUS Call(uint64_t funcNameHash, Args... args) {
     return trampoline(getSyscallNumber(funcNameHash), getSyscallInstrAddr(),
