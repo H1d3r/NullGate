@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   status = syscalls.SCall<NtCreateThreadEx>(
       ng::obfuscation::fnv1Const("NtCreateThreadEx"), &threadHandle,
       THREAD_ALL_ACCESS, &objectAttrs, processHandle, startRoutine, nullptr,
-      CREATE_SUSPENDED, 0, 0, 0, nullptr);
+      THREAD_CREATE_FLAGS_CREATE_SUSPENDED, 0, 0, 0, nullptr);
   if (!NT_SUCCESS(status)) {
     syscalls.SCall<NtClose>(ng::obfuscation::fnv1Const("NtClose"),
                             processHandle);
