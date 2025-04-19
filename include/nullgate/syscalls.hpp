@@ -10,6 +10,7 @@
 
 extern "C" NTSTATUS NTAPI trampoline(size_t syscallNo, uintptr_t syscallAddr,
                                      size_t ArgumentsSize, ...);
+
 namespace nullgate {
 
 class syscalls {
@@ -29,7 +30,7 @@ class syscalls {
   }
 
   // Either forwards args perferctly or if they're not compatible casts them to
-  // the right decayed type
+  // the right type
   template <typename To, typename T> decltype(auto) forwardCast(T &&t) {
     if constexpr (std::is_same_v<std::decay_t<To>, std::decay_t<T>>) {
       return std::forward<To>(t);
@@ -69,10 +70,15 @@ public:
   template <typename func, typename... Ts>
     requires std::invocable<func, Ts...>
   NTSTATUS SCall(const std::string &funcName, Ts &&...args) {
-    return [&]<typename R, typename... Args>(std::type_identity<R(Args...)>) {
+    return [&]<typename R, typename... Args>(
+               std::type_identity<R(Args...)>,
+               auto &&...forwardedArgs) { // auto&& because cannot inject other
+                                          // templated types into a templated
+                                          // lambda
       return trampoline(getSyscallNumber(funcName), getSyscallInstrAddr(),
-                        getArgStackSize(args...), forwardCast<Args>(args)...);
-    }(std::type_identity<func>{});
+                        getArgStackSize(forwardedArgs...),
+                        forwardCast<Args>(std::forward<Ts>(forwardedArgs))...);
+    }(std::type_identity<func>{}, std::forward<Ts>(args)...);
   }
 
   /// @brief Checks if function is callable with the passed arguments, cast the
@@ -85,10 +91,15 @@ public:
   template <typename func, typename... Ts>
     requires std::invocable<func, Ts &&...>
   NTSTATUS SCall(uint64_t funcNameHash, Ts &&...args) {
-    return [&]<typename R, typename... Args>(std::type_identity<R(Args...)>) {
+    return [&]<typename R, typename... Args>(
+               std::type_identity<R(Args...)>,
+               auto &&...forwardedArgs) { // auto&& because cannot inject other
+                                          // templated types into a templated
+                                          // lambda
       return trampoline(getSyscallNumber(funcNameHash), getSyscallInstrAddr(),
-                        getArgStackSize(args...), forwardCast<Args>(args)...);
-    }(std::type_identity<func>{});
+                        getArgStackSize(forwardedArgs...),
+                        forwardCast<Args>(std::forward<Ts>(forwardedArgs))...);
+    }(std::type_identity<func>{}, std::forward<Ts>(args)...);
   }
 };
 
