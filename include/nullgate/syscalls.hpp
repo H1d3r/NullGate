@@ -31,12 +31,19 @@ class syscalls {
 
   // Either forwards args perferctly or if they're not compatible casts them to
   // the right type
-  template <typename To, typename T> decltype(auto) forwardCast(T &&t) {
-    if constexpr (std::is_same_v<std::decay_t<To>, std::decay_t<T>>) {
-      return std::forward<To>(t);
-    } else {
-      return static_cast<To>(t);
-    }
+  template <typename To, typename T> auto forwardCast(T &&t) -> To {
+    using ForwardedType = decltype(std::forward<T>(t));
+
+    static_assert(
+        !(std::is_rvalue_reference_v<To> &&
+          std::is_lvalue_reference_v<ForwardedType>),
+        "Error: Cannot bind an rvalue reference to an lvalue reference.");
+    static_assert(
+        !(std::is_lvalue_reference_v<To> &&
+          std::is_rvalue_reference_v<ForwardedType>),
+        "Error: Cannot bind an lvalue reference to an rvalue reference.");
+
+    return static_cast<To>(std::forward<T>(t));
   }
 
 public:
