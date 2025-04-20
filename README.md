@@ -10,10 +10,26 @@ It also uses a technique that I haven't seen being metioned to bypass windows de
 The usage is pretty straight forward, here is a snippet demonstrating the main functionality:
 ```cpp
 nullgate::syscalls syscalls;
-auto status = syscalls.Call(nullgate::obfuscation::fnv1Const("NtAllocateVirtualMemory"),
-                         processHandle, &buf, 0, &regionSize,
-                         MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+typedef NTSTATUS NTAPI NtAllocateVirtualMemory(
+    _In_ HANDLE ProcessHandle,
+    _Inout_ _At_(*BaseAddress,
+                 _Readable_bytes_(*RegionSize) _Writable_bytes_(*RegionSize)
+                     _Post_readable_byte_size_(*RegionSize)) PVOID *BaseAddress,
+    _In_ ULONG_PTR ZeroBits, _Inout_ PSIZE_T RegionSize,
+    _In_ ULONG AllocationType, _In_ ULONG PageProtection);
+
+auto status = syscalls.SCall<NtAllocateVirtualMemory>(
+      ng::obfuscation::fnv1Const("NtAllocateVirtualMemory"), processHandle,
+      &buf, 0, &regionSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 ```
+There's builtin typesafety. You just need to provide the definiton of the nt function that you want to call! You can easily get that from [ntdoc](https://ntdoc.m417z.com/). This is the recommended way to use the lib.<br><br>
+For people who don't like c++ templating black magic or something the previous interface is still available:
+```cpp
+auto status = syscalls.Call(nullgate::obfuscation::fnv1Const("NtAllocateVirtualMemory"),
+                         processHandle, (PVOID)&buf, (ULONG_PTR)0, &regionSize,
+                         (ULONG)(MEM_RESERVE | MEM_COMMIT), (ULONG)PAGE_EXECUTE_READWRITE);
+```
+Using this interface you <b>need</b> to cast the arguments to the right type, not doing this may cause [problems](https://github.com/0xsch1zo/NullGate/issues/2). <br><br>
 The `fnv1Const` method brings the joys of modern C++ to the maldev world. It is a `consteval` function, so it is guaranteed that it will get evaluated at compile time, replacing the readable function name with a fnv1 hash.<br><br>
 There is also a runtime equivalent called `fnv1Runtime` but of course it doesn't add the benefit of having our function names obfuscated. It is used by the implementation to check which function inside of ntdll to get the syscall number of.<br><br>
 There are routines that can xor encrypt/decrypt(multibyte key) and base64 encode/decode your payload or some message:
