@@ -15,3 +15,5 @@ add_executable(hasher
 target_include_directories(hasher
     PRIVATE ../../include/
 )
+
+target_compile_features(hasher PRIVATE cxx_std_23)

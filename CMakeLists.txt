@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_FLAGS "-s -O3")
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 option(NULLGATE_BUILD_SAMPLE "Build sample" OFF)
 option(NULLGATE_CROSSCOMPILE "Crosscompile from linux to windows(uses mingw)" OFF)
@@ -28,6 +25,18 @@ add_library(nullgate
 
 target_include_directories(nullgate
     PUBLIC ./include/
+)
+
+target_compile_features(nullgate
+    PUBLIC cxx_std_23
+)
+
+target_compile_options(nullgate
+    PRIVATE -s -O3
+)
+
+target_link_options(nullgate
+    PUBLIC -static
 )
 
 if(NULLGATE_BUILD_SAMPLE)
