@@ -40,7 +40,7 @@ if (!NT_SUCCESS(status))
                                "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
         std::to_string(status));
 ```
-The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `<build_dir>/_deps/nullgate-build/src/hasher`. Just pipe something into it and it will spit out a base64 encoded and xored string.<br><br>
+The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `hasher-build/`(Before 1.1.2 it's `<build_dir>/_deps/nullgate-build/src/hasher`). Just pipe something into it and it will spit out a base64 encoded and xored string.<br><br>
 To ease the encryption of shellcode a special functon is provided:
 ```cpp
 auto decryptedShellcode =
@@ -58,7 +58,7 @@ include(FetchContent)
 
 FetchContent_Declare(nullgate
     GIT_REPOSITORY https://github.com/0xsch1zo/NullGate
-    GIT_TAG 1.1.1
+    GIT_TAG 1.1.2
 )
 
 FetchContent_MakeAvailable(nullgate)
