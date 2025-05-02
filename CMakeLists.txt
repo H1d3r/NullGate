@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
 
+set(HASHER_BUILD_DIR ${CMAKE_SOURCE_DIR}/hasher-build)
 option(NULLGATE_BUILD_SAMPLE "Build sample" OFF)
 option(NULLGATE_CROSSCOMPILE "Crosscompile from linux to windows(uses mingw)" OFF)
 
@@ -51,9 +52,20 @@ if(NULLGATE_BUILD_SAMPLE)
     target_link_libraries(sample
         PRIVATE nullgate
     )
+
+    target_compile_options(sample
+        PRIVATE -s -O3
+    )
 endif()
 
-# Hasher
-add_subdirectory(
-    ./src/hasher/
+include(ExternalProject)
+
+ExternalProject_Add(hasher
+    PREFIX ${CMAKE_SOURCE_DIR}/src/hasher
+    SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/hasher
+    BINARY_DIR ${HASHER_BUILD_DIR}
+    DOWNLOAD_DIR ${HASHER_BUILD_DIR}
+    TMP_DIR ${HASHER_BUILD_DIR}
+    STAMP_DIR ${HASHER_BUILD_DIR}
+    INSTALL_COMMAND ""
 )

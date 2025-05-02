@@ -1,2 +1,5 @@
 *.exe
 build/
+hasher-build/
+compile_commands.json
+.cache/
