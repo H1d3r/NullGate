@@ -61,8 +61,8 @@ endif()
 include(ExternalProject)
 
 ExternalProject_Add(hasher
-    PREFIX ${CMAKE_SOURCE_DIR}/src/hasher
-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/hasher
+    PREFIX ${PROJECT_SOURCE_DIR}/src/hasher
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/hasher
     BINARY_DIR ${HASHER_BUILD_DIR}
     DOWNLOAD_DIR ${HASHER_BUILD_DIR}
     TMP_DIR ${HASHER_BUILD_DIR}
