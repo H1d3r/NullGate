@@ -58,7 +58,7 @@ include(FetchContent)
 
 FetchContent_Declare(nullgate
     GIT_REPOSITORY https://github.com/0xsch1zo/NullGate
-    GIT_TAG 1.1.0
+    GIT_TAG 1.1.1
 )
 
 FetchContent_MakeAvailable(nullgate)
