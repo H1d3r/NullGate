@@ -40,8 +40,10 @@ if (!NT_SUCCESS(status))
                                "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
         std::to_string(status));
 ```
-The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `hasher-build/`(Before 1.1.2 it's `<build_dir>/_deps/nullgate-build/src/hasher`). Just pipe something into it and it will spit out a base64 encoded and xored string.
-On windows it will probably be nested beneath a bunch of directories like `Release`, but it will be somewhere there.<br><br>
+The key for now is `FfqO3ZQ6XJ+SICAp`. 
+A hasher is also provided, after building the project, the binary will be accessible at `hasher-build/`(Before 1.1.2 it's `<build_dir>/_deps/nullgate-build/src/hasher`). 
+On windows it will probably be nested beneath a bunch of directories like `Release`, but it will be somewhere there.
+Just pipe something into it and it will spit out a base64 encoded and xored string.<br><br>
 
 To ease the encryption of shellcode a special functon is provided:
 ```cpp
