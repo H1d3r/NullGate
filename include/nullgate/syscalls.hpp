@@ -2,11 +2,10 @@
 
 #include <cstdint>
 #include <map>
-#include <minwindef.h>
-#include <ntdef.h>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <windows.h>
 
 extern "C" NTSTATUS NTAPI trampoline(size_t syscallNo, uintptr_t syscallAddr,
                                      size_t ArgumentsSize, ...);

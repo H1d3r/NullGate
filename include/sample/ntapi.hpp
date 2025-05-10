@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ntdef.h>
-#include <ntstatus.h>
 #include <windows.h>
 
 #define THREAD_CREATE_FLAGS_CREATE_SUSPENDED                                   \
@@ -16,6 +14,35 @@
   0x00000020 // NtCreateThreadEx only // since REDSTONE2
 #define THREAD_CREATE_FLAGS_BYPASS_PROCESS_FREEZE                              \
   0x00000040 // NtCreateThreadEx only // since 19H1
+
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+
+typedef struct _UNICODE_STRING {
+  USHORT Length;
+  USHORT MaximumLength;
+#ifdef MIDL_PASS
+  [ size_is(MaximumLength / 2), length_is((Length) / 2) ] USHORT *Buffer;
+#else  // MIDL_PASS
+  _Field_size_bytes_part_opt_(MaximumLength, Length) PWCH Buffer;
+#endif // MIDL_PASS
+} UNICODE_STRING;
+typedef UNICODE_STRING *PUNICODE_STRING;
+typedef const UNICODE_STRING *PCUNICODE_STRING;
+// end_sdfwdm
+// end_wudfwdm
+
+#define UNICODE_NULL ((WCHAR)0) // winnt
+
+typedef struct _OBJECT_ATTRIBUTES {
+  ULONG Length;
+  HANDLE RootDirectory;
+  PUNICODE_STRING ObjectName;
+  ULONG Attributes;
+  PVOID SecurityDescriptor;       // Points to type SECURITY_DESCRIPTOR
+  PVOID SecurityQualityOfService; // Points to type SECURITY_QUALITY_OF_SERVICE
+} OBJECT_ATTRIBUTES;
+typedef OBJECT_ATTRIBUTES *POBJECT_ATTRIBUTES;
+typedef CONST OBJECT_ATTRIBUTES *PCOBJECT_ATTRIBUTES;
 
 // 0x10 bytes (sizeof)
 typedef struct _CLIENT_ID {

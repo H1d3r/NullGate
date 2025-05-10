@@ -1,13 +1,6 @@
-#include <cstdio>
-#include <ctime>
-#include <libloaderapi.h>
-#include <minwindef.h>
-#include <ntdef.h>
 #include <nullgate/obfuscation.hpp>
 #include <nullgate/syscalls.hpp>
 #include <stdexcept>
-#include <windows.h>
-#include <winnt.h>
 #include <winternl.h>
 
 namespace nullgate {

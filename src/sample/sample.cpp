@@ -1,11 +1,9 @@
-#include <ntdef.h>
 #include <nullgate/obfuscation.hpp>
 #include <nullgate/syscalls.hpp>
 #include <sample/ntapi.hpp>
 #include <stdexcept>
 #include <string>
 #include <windows.h>
-#include <winnt.h>
 
 namespace ng = nullgate;
 
