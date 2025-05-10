@@ -40,7 +40,9 @@ if (!NT_SUCCESS(status))
                                "x8lAwI8H3o3VzEmTjdpNCgELlxR") +
         std::to_string(status));
 ```
-The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `hasher-build/`(Before 1.1.2 it's `<build_dir>/_deps/nullgate-build/src/hasher`). Just pipe something into it and it will spit out a base64 encoded and xored string.<br><br>
+The key for now is `FfqO3ZQ6XJ+SICAp`. A hasher is also provided, after building the project, the binary will be accessible at `hasher-build/`(Before 1.1.2 it's `<build_dir>/_deps/nullgate-build/src/hasher`). Just pipe something into it and it will spit out a base64 encoded and xored string.
+On windows it will probably be nested beneath a bunch of directories like `Release`, but it will be somewhere there.<br><br>
+
 To ease the encryption of shellcode a special functon is provided:
 ```cpp
 auto decryptedShellcode =
@@ -58,7 +60,7 @@ include(FetchContent)
 
 FetchContent_Declare(nullgate
     GIT_REPOSITORY https://github.com/0xsch1zo/NullGate
-    GIT_TAG 1.1.2
+    GIT_TAG 1.1.3
 )
 
 FetchContent_MakeAvailable(nullgate)
@@ -75,7 +77,10 @@ target_link_libraries(test
 ```
 The linking is done statically so you don't have to worry about symbols being visible.
 ## Build
-To build the sample use `-DNULLGATE_BUILD_SAMPLE=ON`. It will be accessible at `<build_dir>/_deps/nullgate-build/sample.exe`. It takes a PID that you want to inject shellcode into as an argument.
+To build the sample use `-DNULLGATE_BUILD_SAMPLE=ON`. 
+If you built nullgate directly it will be accessible at `<build_dir>/sample.exe`, if you built it as a dependency at `<build_dir>/_deps/nullgate-build/sample.exe`. 
+On windows because the build destinations are weird, it will probably be at the same base directories of locations of samples but probably nested a bunch more.
+It takes a PID that you want to inject shellcode into as an argument.
 > [!WARNING]
 > If you are using linux you need to have the mingw crosscompiler installed. On Arch for example you can do `pacman -S mingw-w64-gcc`. Then use the `-DNULLGATE_CROSSCOMPILE=ON` option to set mingw as the default compiler for the relevant parts of the program.
 ```
