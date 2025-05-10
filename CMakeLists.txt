@@ -52,7 +52,11 @@ target_compile_features(nullgate
     PUBLIC cxx_std_23
 )
 
-if (NOT WIN32)
+if (WIN32)
+    target_compile_options(nullgate
+        PUBLIC /MT
+    )
+else()
     target_link_options(nullgate
         PUBLIC -static
     )
