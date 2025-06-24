@@ -19,7 +19,7 @@ typedef NTSTATUS NTAPI NtAllocateVirtualMemory(
     _In_ ULONG AllocationType, _In_ ULONG PageProtection);
 
 auto status = syscalls.SCall<NtAllocateVirtualMemory>(
-      ng::obfuscation::fnv1Const("NtAllocateVirtualMemory"), processHandle,
+      nullgate::obfuscation::fnv1Const("NtAllocateVirtualMemory"), processHandle,
       &buf, 0, &regionSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 ```
 There's builtin typesafety. You just need to provide the definiton of the nt function that you want to call! You can easily get that from [ntdoc](https://ntdoc.m417z.com/). This is the recommended way to use the lib.<br><br>
